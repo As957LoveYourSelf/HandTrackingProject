@@ -27,7 +27,9 @@ class HandDetector():
 
     # 寻找指定的点
     def findHandPosition(self, img, handNo=0, draw=True):
-
+        xlist = []
+        ylist = []
+        box = []
         landMarkList = []
         if self.results.multi_hand_landmarks:
             myHand = self.results.multi_hand_landmarks[handNo]
@@ -35,11 +37,21 @@ class HandDetector():
                 height, weight, channel = img.shape
                 # lm是该点在图片坐标的相对于图片尺寸的比例值，与图片高度和宽度相乘即可得出该点的像素值坐标
                 cx, cy = int(lm.x * weight), int(lm.y * height)
+                xlist.append(cx)
+                ylist.append(cy)
                 landMarkList.append([id, cx, cy])
+
                 if draw:
                     cv2.circle(img, (cx, cy), 6, (255, 0, 0), cv2.FILLED)
 
-        return landMarkList
+            xmin, xmax = min(xlist), max(xlist)
+            ymin, ymax = min(ylist), max(ylist)
+            box = xmin, ymin, xmax, ymax
+
+            if draw:
+                cv2.rectangle(img, (xmin - 20, ymin - 20), (xmax + 20, ymax + 20), (0, 255, 0), 2)
+
+        return landMarkList, box
 
     def countFingerUp(self, lmlist):
         fingers = []
